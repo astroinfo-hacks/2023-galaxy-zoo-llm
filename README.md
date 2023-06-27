@@ -13,4 +13,4 @@ You can watch the [hack presentation][telecon] by Jo during the telecon.
 Here is a list of references to get started on the subject
 - [LLaVA paper](https://arxiv.org/abs/2304.08485)
 - [LLaVA demo](https://llava-vl.github.io/)
-- Hugging Face Transformers (https://huggingface.co/docs/transformers/index)
+-[Hugging Face Transformers] (https://huggingface.co/docs/transformers/index)
