@@ -13,4 +13,8 @@ You can watch the [hack presentation][telecon] by Jo during the telecon.
 Here is a list of references to get started on the subject
 - [LLaVA paper](https://arxiv.org/abs/2304.08485)
 - [LLaVA demo](https://llava-vl.github.io/)
-- [Hugging Face Transformers] (https://huggingface.co/docs/transformers/index)
+
+LLM-specific resources:
+- HuggingFace Transformers (https://huggingface.co/docs/transformers/index) 
+- Langchain tutorials, e.g. how to summarise https://python.langchain.com/docs/modules/chains/popular/summarize.html
+- OpenAI cookbook: https://github.com/openai/openai-cookbook. This example shows you can you can summarise a paper, for example: https://github.com/openai/openai-cookbook/blob/main/examples/How_to_call_functions_for_knowledge_retrieval.ipynb
