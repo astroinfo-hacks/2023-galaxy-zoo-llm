@@ -4,6 +4,8 @@
 
 The rationale of this project is to leverage existing Multi-Modal Large Models (MLMs) to engage meaningfully with astronomical images. The overarching goal is to build a fine-tuned Language and Vision Model such as LlaVA on a curated dataset from the Galaxy Zoo project. 
 
+![image](assets/galaxy.png)
+
 The steps of the project are as follows:
 1) Identify the size and characteristics of the Galaxy Zoo dataset
 2) Retrieve the images and the text descriptions
