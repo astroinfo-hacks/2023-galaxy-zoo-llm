@@ -33,7 +33,11 @@ def build_talk_database(driver, n_pages):
     # Do a for loop aggregating the dataframes 
     for i in tqdm(range(2, n_pages+1)):
         # Append the pandas dataframe from generator or urls
-        df = pd.concat([df, pd.DataFrame(retrieve_talk_urls(driver, i), columns=["unique_id", "url", "comments", "participants"])])
+        try:
+            df = pd.concat([df, pd.DataFrame(retrieve_talk_urls(driver, i), columns=["unique_id", "url", "comments", "participants"])])
+        except:
+            print("Error with page %d"%i)
+            continue
     return df
 
 
@@ -43,7 +47,7 @@ def main(argv):
     options = webdriver.ChromeOptions()
     options.add_argument("headless")
     driver = webdriver.Chrome(options=options)
-    driver.implicitly_wait(10);
+    driver.implicitly_wait(20);
     # Build the dataframe
     df = build_talk_database(driver, FLAGS.n)
     # Save the dataframe
