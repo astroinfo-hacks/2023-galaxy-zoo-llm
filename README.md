@@ -14,6 +14,7 @@ The steps of the project are as follows:
 7) Evaluate the model.
 
 You can watch the [hack presentation][telecon] by Jo during the telecon.
+There is also a good video describing MLMs here: https://www.youtube.com/watch?v=mkI7EPD1vp8
 
 [telecon]: https://u-paris.zoom.us/rec/share/ibQAB_HcRwoRFxrmne3RtWUnGp3xH_bqsS9oOG0vMHZEPJidfSASYsXzR_MzNCM.0GfrQ39bReZsAScg
 
