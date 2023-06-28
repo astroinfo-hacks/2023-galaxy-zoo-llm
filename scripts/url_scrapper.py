@@ -7,7 +7,7 @@ from absl import app
 from absl import flags
 
 FLAGS = flags.FLAGS
-flags.DEFINE_integer("n_pages", 1, "Number of pages to scrap")
+flags.DEFINE_integer("n", 1, "Number of pages to scrap")
 
 # Accessing the page from GalaxyZoo
 base_url = "https://www.zooniverse.org"
@@ -22,17 +22,18 @@ def retrieve_talk_urls(driver, page_id):
     # Extract the urls, number of participants, and number of comments
     for e in elements:
         url = e.find_element(By.TAG_NAME, "h1").find_element(By.TAG_NAME, "a").get_attribute("href")
+        unique_id = url.split("/")[-1]
         comments = int(e.text.split("\n")[-1].split(" ")[0])
         participants = int(e.text.split("\n")[-2].split(" ")[0])
-        yield url, comments, participants
+        yield unique_id, url, comments, participants
 
 
 def build_talk_database(driver, n_pages):
-    df = pd.DataFrame(retrieve_talk_urls(driver, 1), columns=["url", "comments", "participants"])
+    df = pd.DataFrame(retrieve_talk_urls(driver, 1), columns=["unique_id", "url", "comments", "participants"])
     # Do a for loop aggregating the dataframes 
     for i in tqdm(range(2, n_pages+1)):
         # Append the pandas dataframe from generator or urls
-        df = pd.concat([df, pd.DataFrame(retrieve_talk_urls(driver, i), columns=["url", "comments", "participants"])])
+        df = pd.concat([df, pd.DataFrame(retrieve_talk_urls(driver, i), columns=["unique_id", "url", "comments", "participants"])])
     return df
 
 
@@ -44,7 +45,7 @@ def main(argv):
     driver = webdriver.Chrome(options=options)
     driver.implicitly_wait(10);
     # Build the dataframe
-    df = build_talk_database(driver, FLAGS.n_pages)
+    df = build_talk_database(driver, FLAGS.n)
     # Save the dataframe
     df.to_csv("talk_urls.csv", index=False)
     # Close the driver
