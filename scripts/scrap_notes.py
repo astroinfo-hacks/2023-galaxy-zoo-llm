@@ -21,8 +21,8 @@ def retrieve_conversation(driver, unique_id, url):
     elements = driver.find_elements(By.CLASS_NAME, "polaroid-image")
     image = elements[0].find_element(By.TAG_NAME, "img")
     # download the image using urllib and save it with name made from unique_id
-    image_name = FLAGS.output_path+"/%d.png"%unique_id
-    urllib.request.urlretrieve(image.get_attribute("src"), image_name)
+    image_name = "%d.png"%unique_id
+    urllib.request.urlretrieve(image.get_attribute("src"), FLAGS.output_path+"/"+image_name)
 
     # Retrieve the conversation
     elements = driver.find_elements(By.CLASS_NAME, "talk-comment-content")
