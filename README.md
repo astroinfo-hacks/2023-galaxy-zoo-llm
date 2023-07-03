@@ -16,7 +16,7 @@ The steps of the project are as follows:
 6) Evaluate the model.
 
 
-The architecture of the LlaVA paper, where we connect the pre-trained CLIP visual encoder ViT-L/14 to the LLAMA decoder.
+The architecture of the LlaVA model, where the pre-trained CLIP visual encoder is connected to a ViT-L/14 to the LLAMA decoder.
 ![image](assets/llava_arc.png)
 
 
