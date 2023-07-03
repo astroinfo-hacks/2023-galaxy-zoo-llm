@@ -2,7 +2,7 @@
 
 ## Rationale
 
-The rationale of this project is to leverage existing Multi-Modal Large Models (MLMs) to engage meaningfully with astronomical images. The overarching goal is to build a fine-tuned Language and Vision Model such as LlaVA on a curated dataset from the Galaxy Zoo project. 
+The rationale of this project is to leverage existing Large Multi-Modal Models (LMMs) to engage meaningfully with astronomical images. The overarching goal is to build a fine-tuned Language and Vision Model such as LlaVA on a curated dataset from the Galaxy Zoo project. 
 
 ![image](assets/galaxy.png)
 
@@ -16,7 +16,7 @@ The steps of the project are as follows:
 6) Evaluate the model.
 
 
-The architecture of the llava model:
+The architecture of the LlaVA paper, where we connect the pre-trained CLIP visual encoder ViT-L/14 to the LLAMA decoder.
 ![image](assets/llava_arc.png)
 
 
