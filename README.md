@@ -7,14 +7,16 @@ The rationale of this project is to leverage existing Multi-Modal Large Models (
 ![image](assets/galaxy.png)
 
 The steps of the project are as follows:
-1) Identify the size and characteristics of the Galaxy Zoo dataset
-2) Retrieve the images and the text descriptions
-3) Summarise the text using a LLM. For example, we might use LangChain or Llama-index here. 
-4) Curate the image - summary pairs for the fine-tuning.
-5) Read and understand the high-level details of the LlaVA and Llava-Med papers. 
-6) Download the 13B model weights.
+1) Explore the Galaxy Zoo Talk dataset
+2) Summarise the text using a LLM. For example, we might use LangChain or Llama-index here. 
+3) Curate the image - summary pairs for the fine-tuning.
+4) Read and understand the high-level details of the LlaVA and Llava-Med papers. 
+5) Download the 13B model weights.
 6) Fine-tune the model.
 7) Evaluate the model.
+
+![image](assets/llava_med.png)
+
 
 You can watch the [hack presentation][telecon] by Jo during the telecon.
 
