@@ -4,6 +4,10 @@
 
 The rationale of this project is to leverage existing Large Multi-Modal Models (LMMs) to engage meaningfully with astronomical images. The overarching goal is to build a fine-tuned Language and Vision Model such as LlaVA on a curated dataset from the Galaxy Zoo project. 
 
+You can see examples of chat here:
+
+https://www.zooniverse.org/projects/zookeeper/galaxy-zoo/talk/1270
+
 ![image](assets/galaxy.png)
 
 The steps of the project are as follows:
