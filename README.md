@@ -15,7 +15,9 @@ The steps of the project are as follows:
 6) Fine-tune the model.
 7) Evaluate the model.
 
-![image](assets/llava_med.png)
+
+The architecture of the llava model:
+![image](assets/llava_arc.png)
 
 
 You can watch the [hack presentation][telecon] by Jo during the telecon.
