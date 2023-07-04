@@ -114,6 +114,11 @@ Answer:""" % (conversation,question)
             pass
         except Exception as e:
             print(e)
+            return {
+                "id": "{}".format(entry['id']),
+                "image": "{}.png".format(entry['id']),
+                "conversations": [{"from": "human", "value": question}, {"from": "gpt", "value": "I am not sure what this image shows."}]
+            }
         time.sleep(1)
         
 def generate_summaries(dataset):
