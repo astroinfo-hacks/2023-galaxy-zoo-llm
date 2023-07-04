@@ -7,6 +7,7 @@ import urllib.request
 import os
 from absl import app, flags
 from absl.flags import FLAGS
+from multiprocessing import Pool
 
 # Define the command line arguments
 flags.DEFINE_string('input_csv', 'GZ_talk_comments_notes_urls_AISSAI.csv', 'Path to the input CSV file')
@@ -62,19 +63,31 @@ def main(_argv):
         # Append the group dictionary to the list
         grouped_data_list.append(group_dict)
 
-        # Download the image if the flag is set
-        if FLAGS.download_images:
-            # Create the output path
-            output_path = FLAGS.output_folder + "/" + str(discussion_id).split(".")[0] + ".jpeg"
-
-            # Download the image
-            urllib.request.urlretrieve(image, output_path)
-
         # Update the progress bar
         progress_bar.update(1)
 
     # Close the progress bar
     progress_bar.close()
+
+    # Use multiprocessing to download all the images in the dataset
+    if FLAGS.download_images:
+        # Create a pool of processes
+        pool = Pool()
+
+        # Define the function to download an image
+        def download_image(image_url):
+            # Create the output path
+            output_path = FLAGS.output_folder + "/" + str(image_url).split("/")[-1]
+
+            # Download the image
+            urllib.request.urlretrieve(image_url, output_path)
+
+        # Download the images
+        pool.map(download_image, data['image'].tolist())
+
+        # Close the pool
+        pool.close()
+
 
     # Convert the grouped data list to JSON
     json_data = json.dumps(grouped_data_list, indent=4)
