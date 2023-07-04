@@ -49,11 +49,11 @@ def main(_argv):
         # Extract the first entry from the "locations" column
         location_entry = group['locations'].iloc[0]
         #need that because of https://
-        image = ((location_entry.split(":")[1])+":"+(location_entry.split(":")[2])).strip('\"').split("jpeg")[0]+"jpeg"
+        image = ((location_entry.split(":")[1])+":"+(location_entry.split(":")[2])).strip('\"').split('\"')[0]
 
         # Create a dictionary for each group
         group_dict = {
-            "id": str(discussion_id).split(".")[0],
+            "id": str(int(discussion_id)),
             "image": image,
             "conversations": []
         }
