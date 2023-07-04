@@ -1,3 +1,4 @@
+data
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -162,3 +163,5 @@ cython_debug/
 scripts/talks_dset/
 scripts/talk_urls.csv
 notebooks/dev
+.DS_Store
+
