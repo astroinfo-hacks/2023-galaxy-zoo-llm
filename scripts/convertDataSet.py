@@ -17,6 +17,12 @@ flags.DEFINE_bool('download_images', False, 'Download images from the URLs in th
 
 FLAGS = flags.FLAGS
 
+def download_image(group_dict):
+    try:
+        urllib.request.urlretrieve(group_dict["image"], FLAGS.output_folder + "/" + group_dict["id"] + ".jpeg")
+    except:
+        print("Could not download image for subject ID " + group_dict["id"])
+
 # Define the main function
 def main(_argv):
 
@@ -71,11 +77,6 @@ def main(_argv):
     
     # Use multiprocessing to download all the images in grouped_data_list
     if FLAGS.download_images:
-        def download_image(group_dict):
-            try:
-                urllib.request.urlretrieve(group_dict["image"], FLAGS.output_folder + "/" + group_dict["id"] + ".jpeg")
-            except:
-                print("Could not download image for subject ID " + group_dict["id"])
         with Pool() as pool:
             pool.map(download_image, grouped_data_list)
 
