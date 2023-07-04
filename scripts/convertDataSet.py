@@ -68,31 +68,19 @@ def main(_argv):
 
     # Close the progress bar
     progress_bar.close()
-
-    # Use multiprocessing to download all the images in the dataset
+    
+    # Use multiprocessing to download all the images in grouped_data_list
     if FLAGS.download_images:
-        # Create a pool of processes
-        pool = Pool()
+        def download_image(group_dict):
+            try:
+                urllib.request.urlretrieve(group_dict["image"], FLAGS.output_folder + "/" + group_dict["id"] + ".jpeg")
+            except:
+                print("Could not download image for subject ID " + group_dict["id"])
+        with Pool() as pool:
+            pool.map(download_image, grouped_data_list)
 
-        # Define the function to download an image
-        def download_image(image_url):
-            # Create the output path
-            output_path = FLAGS.output_folder + "/" + str(image_url).split("/")[-1]
-
-            # Download the image
-            urllib.request.urlretrieve(image_url, output_path)
-
-        # Download the images
-        pool.map(download_image, data['image'].tolist())
-
-        # Close the pool
-        pool.close()
-
-
-    # Convert the grouped data list to JSON
+    # Convert the grouped data list to JSON and save it to a file
     json_data = json.dumps(grouped_data_list, indent=4)
-
-    # Write the JSON metadata to a file
     with open( FLAGS.output_folder + "/metadata.json", 'w') as file:
         file.write(json_data)
 
