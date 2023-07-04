@@ -124,6 +124,10 @@ def generate_summaries(dataset):
     with Pool(4) as pool:
         for result in tqdm(pool.imap(get_answer, dataset), total=len(dataset), desc="Generating QA"):
             data.append(result)
+            # write to json every 100 answers
+            if len(data) % 100 == 0:
+                write_to_json(data, FLAGS.output)
+
     return data
 
 # Define the main function
