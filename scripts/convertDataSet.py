@@ -6,7 +6,6 @@ from tqdm import tqdm
 import urllib.request
 import os
 from absl import app, flags
-from absl.flags import FLAGS
 from multiprocessing import Pool
 
 # Define the command line arguments
