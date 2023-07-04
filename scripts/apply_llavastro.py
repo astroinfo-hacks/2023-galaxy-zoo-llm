@@ -170,7 +170,7 @@ def eval_model(args):
 
     for i in tqdm(range(1000)):
         idx = i
-        question = prompt_pool[i % len(prompt_pool)]
+        qs = prompt_pool[i % len(prompt_pool)]
         
         # question = line['conversations'][0]
         # gt_ans = line["conversations"][1]
