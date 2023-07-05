@@ -1,154 +1,147 @@
 import os
 import json
-import openai
-from absl import app, flags
-from tqdm import tqdm
-from multiprocessing import Pool
-import random
 import time
-
-# Define the command line arguments
-flags.DEFINE_string('input', 'galaxyzoo_dataset/metadata.json', 'Path to the input JSON file')
-flags.DEFINE_string('output', 'galaxyzoo_dataset/qa.json', 'Path to the output JSON file')
-
-
-FLAGS = flags.FLAGS
-
-detail_describe_instructions = [
-    "Describe the following image in detail.",
-    "Provide a detailed description of the given image.",
-    "Give an elaborate explanation of the image you see.",
-    "Share a comprehensive rundown of the presented image.",
-    "Offer a thorough analysis of the image.",
-    "Explain the various aspects of the image before you.",
-    "Clarify the contents of the displayed image with great detail.",
-    "Characterize the image using a well-detailed description.",
-    "Break down the elements of the image in a detailed manner.",
-    "Walk through the important details of the image.",
-    "Portray the image with a rich, descriptive narrative.",
-    "Narrate the contents of the image with precision.",
-    "Analyze the image in a comprehensive and detailed manner.",
-    "Illustrate the image through a descriptive explanation.",
-    "Examine the image closely and share its details.",
-    "Write an exhaustive depiction of the given image.",
-]
-
-concise_describe_instructions = [
-    "Describe the following image concisely.",
-    "Provide a brief description of the given image.",
-    "Offer a succinct explanation of the picture presented.",
-    "Summarize the visual content of the following image.",
-    "Give a short and clear explanation of the subsequent image.",
-    "Share a concise interpretation of the image provided.",
-    "Present a compact description of the photo's key features.",
-    "Relay a brief, clear account of the picture shown.",
-    "Render a clear and concise summary of the photo below.",
-    "Write a terse but informative summary of the following picture.",
-    "Create a compact narrative representing the image presented.",
-]
-
-prompt_pool = detail_describe_instructions + concise_describe_instructions
+import openai
+from multiprocessing import Pool
+from tqdm import tqdm
+import importlib
+import random
+import copy
+import argparse
 
 
-def load_dataset(file_path):
-    with open(file_path, 'r') as file:
-        return json.load(file)
-
-def write_to_json(data, output_path):
-    with open(output_path, 'w') as file:
-        json.dump(data, file, indent=4)
-
-def get_answer(entry):
-    conversation = ""
-    for j in range(len(entry['conversations'])):
-        conversation += "User: " + entry['conversations'][j]['value'] + "\n\n"
-
-    # Extract a random question from prompt pool
-    question = prompt_pool[random.randint(0, len(prompt_pool) - 1)]
+MAX_TOKENS = 2048
 
 
-    prompt = """
-You are an AI assistant specialising in astronomical topics. 
-You are provided with the following conversation between galaxy zoo users 
-that comment on an astronomical image. Unfortunately, you do not have access to the actual image.
-Conversation:
-------
-%s
-------
-End of conversation.
-Answer the question asked below between you and a person asking about this photo. 
-The answers should be in a tone that a visual AI assistant is seeing the 
-image and answering the question. 
+class QAGenerator:
 
-Below are the requirements for generating the answer:
-1. Avoid quoting or referring to specific facts, terms, abbreviations, dates, numbers, or
-names, as these may reveal the conversation is based on the text information, rather than
-the image itself. Focus on the visual aspects of the image that can be inferred without
-the text information. \
-2. Do not use phrases like "mentioned", "caption", "context" in the conversation. Instead,
-refer to the information as being "in the image." \
-3. Do not use your knowledge to interpret the image and keep the answers short. \
+    def __init__(self, input_path: str, output_path: str, question_path: str, prompt_path: str, n_inputs: int = -1, n_processes: int = 4) -> None:
+        self.dataset = self.load_dataset(input_path, n_inputs)
+        self.output_path = output_path
+        self.questions = self.load_module(question_path).questions
+        self.prompt = self.load_module(prompt_path).prompt
+        self.n_processes = n_processes
 
-Now, please respond to the question below as if you were describing the image in the style of a professional astronomer.
-
-Question: %s
-Answer:""" % (conversation,question)
-
-    while True:
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{'role': 'user', 'content': prompt}],
-                temperature=0,
-           )
-            question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": response['choices'][0]['message'].content}]
-
-            obj = {
-                "id": "{}".format(entry['id']),
-                "image": "{}.png".format(entry['id']),
-                "conversations": question_and_answer
-            }
-
-            return obj
-        except openai.error.RateLimitError:
-            pass
-        except Exception as e:
-            print(e)
-            return {
-                "id": "{}".format(entry['id']),
-                "image": "{}.png".format(entry['id']),
-                "conversations": [{"from": "human", "value": question}, {"from": "gpt", "value": "I am not sure what this image shows."}]
-            }
-        time.sleep(1)
-        
-def generate_summaries(dataset):
+    def load_module(self, path: str):
+        """
+        Allows to load variables from questions.py and prompt.py.
+        """
+        spec = importlib.util.spec_from_file_location("settings", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
     
-    data = []
+    def load_dataset(self, input_path: str, n_inputs: int = -1) -> list[dict]:
+        """
+        Load the galaxy-zoo json dataset. If specified, a random subset of the dataset is returned.
+        """
+        with open(input_path, 'r') as file:
+            dataset = json.load(file)
+        if 0 < n_inputs < len(dataset):
+            return random.sample(dataset, n_inputs)
+        else:
+            return dataset
 
-    # Use multiprocessing to parallelize the generation of summaries by calling call_api over a list of prompts
-    with Pool(4) as pool:
-        for result in tqdm(pool.imap(get_answer, dataset), total=len(dataset), desc="Generating QA"):
-            data.append(result)
-            # write to json every 100 answers
-            if len(data) % 100 == 0:
-                write_to_json(data, FLAGS.output)
+    def write_to_json(self, data: list, output_path: str):
+        with open(output_path, 'w') as file:
+            json.dump(data, file, indent=4)
 
-    return data
+    def concat_conversation(self, entry: dict) -> str:
+        """
+        Convert the conversation into a single string. Each user is separated with '\n\nUser:'.
+        If the conversation is not a string or is too long, respectectively discard or crop the conversation.
+        """
+        conversation = ""
+        for j in range(len(entry['conversations'])):
+            conversation += "User: " + entry['conversations'][j]['value'] + "\n\n"
+
+        # If conversation is a string
+        if not isinstance(conversation, str):
+            conversation = ""
+
+        # Maximum number of tokens you can send to this model is 2,048 tokens per request.
+        # TODO: check the size of the conversation
+
+        return conversation
+
+    def get_answer_from_gpt(self, entry: dict) -> list[dict]:
+        """
+        Send the content to GPT and return the answer into a question/answer format.
+        """
+        conversation = self.concat_conversation(entry)
+        question = self.questions[random.randint(0, len(self.questions) - 1)]
+        content = copy.deepcopy(self.prompt) % (conversation, question)
+
+        if len(conversation) > 0:
+            while True:
+                try:
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{'role': 'user', 'content': content}],
+                        temperature=0,
+                    )
+                    
+                    question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": response['choices'][0]['message'].content}]
+
+                    obj = {
+                        "id": "{}".format(entry['id']),
+                        "image": "{}.png".format(entry['id']),
+                        "conversations": question_and_answer
+                    }
+
+                    return obj
+                
+                except openai.error.RateLimitError:
+                    # While GPT is not responding due to rate limit...
+                    pass
+                except Exception as e:
+                    print(e)
+                    return {
+                        "id": "{}".format(entry['id']),
+                        "image": "{}.png".format(entry['id']),
+                        "conversations": [{"from": "human", "value": question}, {"from": "gpt", "value": "I am not sure what this image shows."}]
+                    }
+                
+                time.sleep(1)
+        else:
+            return None
+
+    def generate(self) -> list[dict]:
+        """
+        Run the generation of questions and answers.
+        Use multiprocessing to parallelize the generation of summaries by calling call_api over a list of prompts.
+        """
+
+        data = []
+        with Pool(self.n_processes) as pool:
+            for result in tqdm(pool.imap(self.get_answer_from_gpt, self.dataset), total=len(self.dataset), desc="Generating QA"):
+                if result is not None:
+                    data.append(result)
+                # Write to json every 100 answers
+                if len(data) % 100 == 0:
+                    self.write_to_json(data, self.output_path)
+        self.write_to_json(data, self.output_path)
+
+        return data
+
 
 # Define the main function
 def main(args):
     # Load the API key
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    # Load input JSON file
-    dataset = load_dataset(FLAGS.input)
-
-    # Generate the summaries
-    summaries = generate_summaries(dataset)
-
-    # Write the summaries to the output JSON file
-    write_to_json(summaries, FLAGS.output)
+    qa_generator = QAGenerator(args.input_path, args.output_path, args.question_path, args.prompt_path, args.n_inputs, args.n_processes)
+    qa_generator.generate()
 
 
 if __name__ == "__main__":
-    app.run(main)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input-path", type=str, default="./")
+    parser.add_argument("--output-path", type=str, default="./")
+    parser.add_argument("--question-path", type=str, default="./")
+    parser.add_argument("--prompt-path", type=str, default="./")
+    parser.add_argument("--n-inputs", type=int, default=-1)
+    parser.add_argument("--n-processes", type=str, default=4)
+    args = parser.parse_args()
+
+    main(args)
