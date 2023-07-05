@@ -64,52 +64,50 @@ def get_qa_prompt():
         You are provided with the following conversation between galaxy zoo users 
         that comment on an astronomical image. Unfortunately, you do not have access 
         to the actual image.
-        You are provided with the following conversation between galaxy zoo users 
-        that comment on an astronomical image. Unfortunately, you do not have access to 
-        the actual image. Conversation:
+        Conversation:
         ------
         %s
         ------
         End of conversation.
         Design a conversation between you and a person asking about this photo. 
         The answers should be in a tone that a visual AI assistant is seeing the 
-        image and answering the question. Ask diverse questions and give corresponding 
-        answers.
-
-        Below are the requirements for generating the questions and answers from the 
-        conversation:
-        1. Avoid quoting or referring to specific facts, terms, abbreviations, dates, 
-        numbers, or names, as these may reveal the conversation is based on the text 
-        information, rather than the image itself. Focus on the visual aspects of the 
-        image such as shape, size, position of the galaxy in the image, special features
+        image and answering the question. Ask diverse questions and give corresponding answers.
+        
+        Below are the requirements for generating the questions:
+        1. You can get inspiration from the Galaxy Zoo Decision tree for asking the questions about 
+        morphology of the galaxy.\
+        2. Do not ask the redshift of the galaxy, as you can not measure the redshift of the galaxy 
+        just from the image.\ 
+        3. Focus on the visual aspects of the image such as size, 
+        position of the galaxy in the image, special features, morphology, artifacts
         that can be inferred without the text information. \
-        2. Do not use phrases like "mentioned", "caption", "context" in the 
-        conversation. Instead, refer to the information as being "in the image." \
-        3. Do not use your knowledge to interpret the image and keep the questions 
-        and answers short. \
-        4. Do not give redshift of the galaxy, as we can not measure the redshift 
-        of the galaxy just from the image.\ 
-        5. Avoid asking question about the color. \
-        6. Please come up with one user question and one assistant answer about that 
-        image.
 
+        
+        Below are the requirements for generating the answers:
+        1. Avoid quoting or referring to specific facts, terms, abbreviations, dates, numbers, or
+        names. 
+        2. Do not use phrases like "mentioned", "caption", "context", "text" in the conversation. Instead,
+        refer to the information as being "in the image." \
+        3. Avoid referring to "based on the conversation" in answers. \
+        4. Avoid giving answers when there is not enough information. \
+        
+        
+        Please come up with a set four of user questions and assistant answers about that image.
+    
+        Here is one example of questions and answers: 
+        
+        human: What do you see in the image? \
+        gpt:  This image shows a spiral galaxy.\
+        human: How tightly wound the spiral arm appears? \
+        gpt: Arms appear to be mediumly bound. \
+        human: How many spiral arms are there? \
+        gpt: There are four arms. \
+        human: How prominent is the central buldge, compared to rest of the galaxy?
+        gpt: Obvious. \
+        human: Is there anything odd? \
+        gpt: It appears to be disturbed. \
 
-        For example you have this conversation:
-        ------
-        #irregular #clumpy-and-blue, #bright-red-companion, irregular blue clumps.
-        The bar is a clumpy arc above the plane of the disc (if it is one). The arms 
-        are also clumpy. The disc has been divided by a parallel patch which may be a 
-        dust lane but probably an artifact
-        ------
-
-        and you can come up with the User-Assistant question and answer like this:
-
-        human: Can you give imformative details about the image?\
-        gpt:  This image shows a spiral galaxy that appears to be in formation, with 
-        undefined arms and potential evidence of a merger at the top of the galaxy. 
-        There are also interesting tidal debris and features that suggest its arms are 
-        forming. \
-
+        
         Please respond with a json file format like this:
         [
             {
@@ -120,9 +118,9 @@ def get_qa_prompt():
                 "from": "gpt",
                 "value": gpt response,
             }
-
+            
         ]
-
+        
         where human question and gpt response are the question and answer generated."""
 
     return prompt_qa
