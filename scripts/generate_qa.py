@@ -58,7 +58,85 @@ def write_to_json(data, output_path):
     with open(output_path, 'w') as file:
         json.dump(data, file, indent=4)
 
-def get_answer(entry):
+
+def get_qa_prompt():
+    prompt_qa = """You are an AI assistant specialising in astronomical topics. 
+        You are provided with the following conversation between galaxy zoo users 
+        that comment on an astronomical image. Unfortunately, you do not have access 
+        to the actual image.
+        You are provided with the following conversation between galaxy zoo users 
+        that comment on an astronomical image. Unfortunately, you do not have access to 
+        the actual image. Conversation:
+        ------
+        %s
+        ------
+        End of conversation.
+        Design a conversation between you and a person asking about this photo. 
+        The answers should be in a tone that a visual AI assistant is seeing the 
+        image and answering the question. Ask diverse questions and give corresponding 
+        answers.
+
+        Below are the requirements for generating the questions and answers from the 
+        conversation:
+        1. Avoid quoting or referring to specific facts, terms, abbreviations, dates, 
+        numbers, or names, as these may reveal the conversation is based on the text 
+        information, rather than the image itself. Focus on the visual aspects of the 
+        image such as shape, size, position of the galaxy in the image, special features
+        that can be inferred without the text information. \
+        2. Do not use phrases like "mentioned", "caption", "context" in the 
+        conversation. Instead, refer to the information as being "in the image." \
+        3. Do not use your knowledge to interpret the image and keep the questions 
+        and answers short. \
+        4. Do not give redshift of the galaxy, as we can not measure the redshift 
+        of the galaxy just from the image.\ 
+        5. Avoid asking question about the color. \
+        6. Please come up with one user question and one assistant answer about that 
+        image.
+
+
+        For example you have this conversation:
+        ------
+        #irregular #clumpy-and-blue, #bright-red-companion, irregular blue clumps.
+        The bar is a clumpy arc above the plane of the disc (if it is one). The arms 
+        are also clumpy. The disc has been divided by a parallel patch which may be a 
+        dust lane but probably an artifact
+        ------
+
+        and you can come up with the User-Assistant question and answer like this:
+
+        human: Can you give imformative details about the image?\
+        gpt:  This image shows a spiral galaxy that appears to be in formation, with 
+        undefined arms and potential evidence of a merger at the top of the galaxy. 
+        There are also interesting tidal debris and features that suggest its arms are 
+        forming. \
+
+        Please respond with a json file format like this:
+        [
+            {
+                "from": "human",
+                "value": human question,
+            },
+            {
+                "from": "gpt",
+                "value": gpt response,
+            }
+
+        ]
+
+        where human question and gpt response are the question and answer generated."""
+
+    return prompt_qa
+
+
+def get_answer(entry, prompt):
+    """
+
+    :param entry: dataset from galaxy zoo containing conversations
+    :param prompt: prompt which asks the gpt to give Q/A like response,
+    Defalut is False.
+    :return: data consistent with the LLaVA input training dataset
+    """
+
     conversation = ""
     for j in range(len(entry['conversations'])):
         conversation += "User: " + entry['conversations'][j]['value'] + "\n\n"
@@ -66,8 +144,8 @@ def get_answer(entry):
     # Extract a random question from prompt pool
     question = prompt_pool[random.randint(0, len(prompt_pool) - 1)]
 
-
-    prompt = """
+    if !(prompt):
+        prompt = """
 You are an AI assistant specialising in astronomical topics. 
 You are provided with the following conversation between galaxy zoo users 
 that comment on an astronomical image. Unfortunately, you do not have access to the actual image.
@@ -93,6 +171,9 @@ Now, please respond to the question below as if you were describing the image in
 
 Question: %s
 Answer:""" % (conversation,question)
+    else:
+        prompt = "{}".format(get_qa_prompt()) % conversation
+
 
     while True:
         try:
@@ -101,7 +182,12 @@ Answer:""" % (conversation,question)
                 messages=[{'role': 'user', 'content': prompt}],
                 temperature=0,
            )
-            question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": response['choices'][0]['message'].content}]
+
+            if !(prompt):
+                question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": response['choices'][0]['message'].content}]
+            else:
+                question_and_answer = response['choices'][0]['message'].content
+
 
             obj = {
                 "id": "{}".format(entry['id']),
