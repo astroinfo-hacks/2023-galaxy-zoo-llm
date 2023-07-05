@@ -162,6 +162,7 @@ cython_debug/
 
 scripts/talks_dset/
 scripts/talk_urls.csv
+scripts/galaxyzoo_dataset
 notebooks/dev
 .DS_Store
 
