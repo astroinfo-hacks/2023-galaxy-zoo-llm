@@ -136,8 +136,7 @@ def generate_summaries(dataset):
     return data
 
 # Define the main function
-def main(_argv):
-
+def main(args):
     # Load the API key
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
