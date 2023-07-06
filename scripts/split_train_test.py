@@ -24,14 +24,14 @@ def split_data(data, ratio):
 if __name__ == "__main__":
     # Argument parser
     parser = argparse.ArgumentParser(description='Split a JSON file into training and test datasets.')
-    parser.add_argument('--file', required=True, help='Path to the input JSON file.')
+    parser.add_argument('--input-file', required=True, help='Path to the input JSON file.')
     parser.add_argument('--ratio', type=float, default=0.8, help='Ratio for splitting data into training and test sets.')
-    parser.add_argument('--output_dir', default='.', help='Directory to save the split files.')
+    parser.add_argument('--output-dir', default='.', help='Directory to save the split files.')
 
     args = parser.parse_args()
 
     # Load the data from the file
-    file_path = args.file
+    file_path = args.input_file
     data = load_json_file(file_path)
 
     # Split the data into training and test datasets
