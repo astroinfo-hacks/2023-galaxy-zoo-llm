@@ -15,11 +15,11 @@ MAX_TOKENS = 2048
 
 class QAGenerator:
 
-    def __init__(self, input_path: str, output_path: str, prompt_path: str, mode: str, n_inputs: int = -1, n_processes: int = 4) -> None:
-        self.dataset = self.load_dataset(input_path, n_inputs)
-        self.output_path = output_path
+    def __init__(self, input_file: str, output_file: str, prompt_file: str, mode: str, n_inputs: int = -1, n_processes: int = 4) -> None:
+        self.dataset = self.load_dataset(input_file, n_inputs)
+        self.output_file = output_file
         self.n_processes = n_processes
-        module = self.load_module(prompt_path)
+        module = self.load_module(prompt_file)
         assert mode in ['conv', 'desc', 'both'], "Mode must be either 'conv' or 'desc' or 'both but received {mode}".format(mode=mode)
         self.mode = mode
         if mode == 'desc':
@@ -39,19 +39,19 @@ class QAGenerator:
         spec.loader.exec_module(module)
         return module
     
-    def load_dataset(self, input_path: str, n_inputs: int = -1) -> list[dict]:
+    def load_dataset(self, input_file: str, n_inputs: int = -1) -> list[dict]:
         """
         Load the galaxy-zoo json dataset. If specified, a random subset of the dataset is returned.
         """
-        with open(input_path, 'r') as file:
+        with open(input_file, 'r') as file:
             dataset = json.load(file)
         if 0 < n_inputs < len(dataset):
             return random.sample(dataset, n_inputs)
         else:
             return dataset
 
-    def write_to_json(self, data: list, output_path: str):
-        with open(output_path, 'w') as file:
+    def write_to_json(self, data: list, output_file: str):
+        with open(output_file, 'w') as file:
             json.dump(data, file, indent=4)
 
     def concat_conversation(self, entry: dict) -> str:
@@ -118,7 +118,7 @@ class QAGenerator:
                 pass
             except Exception as e:
                 print(e)
-                conversations = conversations[:-2]
+                conversation = conversation[:-2]
             
             time.sleep(1)
         
@@ -136,8 +136,8 @@ class QAGenerator:
                     data.append(result)
                 # Write to json every 100 answers
                 if len(data) % 100 == 0:
-                    self.write_to_json(data, self.output_path)
-        self.write_to_json(data, self.output_path)
+                    self.write_to_json(data, self.output_file)
+        self.write_to_json(data, self.output_file)
 
         return data
 
@@ -147,18 +147,19 @@ def main(args):
     # Load the API key
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    qa_generator = QAGenerator(args.input_path, args.output_path, args.prompt_path, args.mode, args.n_inputs, args.n_processes)
+    qa_generator = QAGenerator(args.input_file, args.output_file, args.prompt_file, args.mode, args.n_inputs, args.n_processes)
     qa_generator.generate()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-path", type=str, default="./")
-    parser.add_argument("--output-path", type=str, default="./")
-    parser.add_argument("--prompt-path", type=str, default="./")
+    parser.add_argument("--input-file", type=str)
+    parser.add_argument("--output-file", type=str)
+    parser.add_argument("--prompt-file", type=str)
     parser.add_argument("--mode", type=str, default="conv")
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
     args = parser.parse_args()
 
     main(args)
+    
