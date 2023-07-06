@@ -58,7 +58,7 @@ refer to the information as being "in the image." \
 4. Avoid giving answers when there is not enough information. \
 
 
-Please come up with a set four of user questions and assistant answers about that image.
+Please come up with a set of at most three user questions and assistant answers about that image.
 
 Here is one example of questions and answers: 
 
@@ -72,6 +72,8 @@ human: How prominent is the central buldge, compared to rest of the galaxy?
 gpt: Obvious. \
 human: Is there anything odd? \
 gpt: It appears to be disturbed. \
+
+If there is not enough information in the conversation, respond with 'I don't have enough information to answer that question.'.
 
 Please respond with a json file format like this:
 [
