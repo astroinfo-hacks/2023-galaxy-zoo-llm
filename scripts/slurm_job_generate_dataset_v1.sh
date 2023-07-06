@@ -10,7 +10,7 @@
 #SBATCH --time=20:00:00
 #SBATCH --account=owt@v100
 
-module python/3.9.12
+module load python/3.9.12
 export PYTHONUSERBASE=/gpfswork/rech/owt/uka17ma/galaxy_zoo/.local
 export PATH=$PATH:$PYTHONUSERBASE/bin
 source $HOME/.bashrc
