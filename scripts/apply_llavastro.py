@@ -169,10 +169,10 @@ def eval_model(args):
     # Build a set of image paths using the image folder with glob
     image_paths = glob.glob(os.path.join(args.image_folder, "*"))
 
-    for i in tqdm(range(1000)):
+    for i in tqdm(range(100)):
         idx = i
         qs = prompt_pool[i % len(prompt_pool)]
-        
+
         # question = line['conversations'][0]
         # gt_ans = line["conversations"][1]
         
@@ -181,8 +181,11 @@ def eval_model(args):
         qs = qs.replace('<image>', '').strip()
         cur_prompt = qs
 
+        
         image_file = image_paths[idx % len(image_paths)]
-
+        image_id = os.path.splitext(image_file)[0].split('/')[-1] # extract the last name without the extension
+        # print(f' qs {qs}  cur_prompt {cur_prompt}')
+        # print(f'------ idx : {idx} imahe file : {image_file} len im paths : {len(image_paths)} image_id {image_id}')        
 
         # if 'image' in line:
         #     image_file = line["image"]
@@ -219,6 +222,8 @@ def eval_model(args):
                 temperature=0.7,
                 max_new_tokens=1024,
                 stopping_criteria=[stopping_criteria])
+#            print('output_ids --> ', output_ids)
+#            print('input_ids --> ', input_ids)
 
         # TODO: new implementation
         input_token_len = input_ids.shape[1]
@@ -293,7 +298,8 @@ def eval_model(args):
 
 
         ans_id = shortuuid.uuid()
-        ans_file.write(json.dumps({"question_id": idx,
+        ans_file.write(json.dumps({"image_id":image_id,
+                                   "question_id": idx,
                                    "prompt": cur_prompt,
                                    "text": outputs,
                                    "answer_id": ans_id,
