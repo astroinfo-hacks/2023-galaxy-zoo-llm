@@ -1,4 +1,0 @@
-evaluation scripts and input files. 
-call the scripts as follows: 
-1) py eval_gpt_review.py -q questionsl.json -a formatted_data.json llavastro_cleared.jsonl -r table/rule.json -o review/reviews_output.jsonl
-2) py summarize_gpt_review.py -d review
