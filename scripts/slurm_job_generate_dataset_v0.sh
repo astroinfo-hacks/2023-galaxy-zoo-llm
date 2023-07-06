@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=generate_qa_v0_fast
+#SBATCH --job-name=generate_qa_v0
 ##SBATCH --output=%x%j.out    # job-name + jobid
 #SBATCH --error=%x%j.err    #
 #SBATCH --nodes=1

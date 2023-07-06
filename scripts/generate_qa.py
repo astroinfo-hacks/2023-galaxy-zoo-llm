@@ -107,7 +107,7 @@ class QAGenerator:
 
                     obj = {
                         "id": "{}".format(entry['id']),
-                        "image": "{}.png".format(entry['id']),
+                        "image": "{}".format(entry['id']) + os.path.splitext(entry['image'])[1],
                         "conversations": question_and_answer
                     }
 
@@ -145,7 +145,7 @@ class QAGenerator:
 # Define the main function
 def main(args):
     # Load the API key
-    openai.api_key = os.getenv(args.OPENAI_API_KEY)
+    openai.api_key = os.getenv(args.openai_api_key)
 
     qa_generator = QAGenerator(args.input_file, args.output_file, args.prompt_file, args.mode, args.n_inputs, args.n_processes)
     qa_generator.generate()
