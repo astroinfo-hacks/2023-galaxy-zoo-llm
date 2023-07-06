@@ -41,10 +41,10 @@ def fetch_info_by_group(subject_id: float, group: pd.DataFrame) -> dict:
 
 
 def main(args):
-    assert os.path.exists(args.input_path), "{input_path} does not exist.".format(input_path=args.input_path)
+    assert os.path.exists(args.input_file), "{input_file} does not exist.".format(input_file=args.input_file)
     
     # Load data
-    data = pd.read_csv(args.input_path)
+    data = pd.read_csv(args.input_file)
 
     # Group the data by "subject_id"
     grouped_data = data.groupby('subject_id')
@@ -66,29 +66,29 @@ def main(args):
     # Close the progress bar
     progress_bar.close()
 
-    # Use multiprocessing to download all the images in grouped_data_list
-    if args.download_images:
-        os.makedirs(args.output_path_images, exist_ok=True)
-        print('Start downloading the images....')
-        download_image_partial = partial(download_image, output_folder_image=args.output_path_images)
-        with Pool() as pool:
-            pool.map(download_image_partial, grouped_data_list)
-        print('Done!')
-
     # Convert the grouped data list to JSON
     json_data = json.dumps(grouped_data_list, indent=4)
 
     # Write the JSON data to a file
-    os.makedirs(os.path.dirname(args.output_path_json), exist_ok=True)
-    with open(args.output_path_json, 'w') as file:
+    os.makedirs(os.path.dirname(args.output_file_json), exist_ok=True)
+    with open(args.output_file_json, 'w') as file:
         file.write(json_data)
+
+    # Use multiprocessing to download all the images in grouped_data_list
+    if args.download_images:
+        os.makedirs(args.output_dir_images, exist_ok=True)
+        print('Start downloading the images....')
+        download_image_partial = partial(download_image, output_folder_image=args.output_dir_images)
+        with Pool() as pool:
+            pool.map(download_image_partial, grouped_data_list)
+        print('Done!')
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input-path", type=str, default="./")
-    parser.add_argument("--output-path-json", type=str, default="./")
-    parser.add_argument("--output-path-images", type=str, default="./")
+    parser.add_argument("--input-file", type=str)
+    parser.add_argument("--output-file-json", type=str)
+    parser.add_argument("--output-dir-images", type=str)
     parser.add_argument("--download-images", type=bool, default=False)
     args = parser.parse_args()
 
