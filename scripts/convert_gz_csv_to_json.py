@@ -66,6 +66,14 @@ def main(args):
     # Close the progress bar
     progress_bar.close()
 
+    # Convert the grouped data list to JSON
+    json_data = json.dumps(grouped_data_list, indent=4)
+
+    # Write the JSON data to a file
+    os.makedirs(os.path.dirname(args.output_path_json), exist_ok=True)
+    with open(args.output_path_json, 'w') as file:
+        file.write(json_data)
+
     # Use multiprocessing to download all the images in grouped_data_list
     if args.download_images:
         os.makedirs(args.output_path_images, exist_ok=True)
@@ -74,14 +82,6 @@ def main(args):
         with Pool() as pool:
             pool.map(download_image_partial, grouped_data_list)
         print('Done!')
-
-    # Convert the grouped data list to JSON
-    json_data = json.dumps(grouped_data_list, indent=4)
-
-    # Write the JSON data to a file
-    os.makedirs(os.path.dirname(args.output_path_json), exist_ok=True)
-    with open(args.output_path_json, 'w') as file:
-        file.write(json_data)
 
 
 if __name__ == "__main__":
