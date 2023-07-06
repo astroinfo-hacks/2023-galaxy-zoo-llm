@@ -3,6 +3,20 @@ import os
 import pandas as pd
 import json
 from tqdm import tqdm
+from urllib import request
+from multiprocessing import Pool
+from functools import partial
+
+
+def download_image(group_dict: dict, output_folder_image: str):
+    url = group_dict["image"]
+    extension = os.path.splitext(url)[1]
+    id = group_dict["id"]
+    try:
+        request.urlretrieve(url, os.path.join(output_folder_image, id + extension))
+    except:
+        print("Could not download image for subject ID " + group_dict["id"])
+        print("URL:", url)
 
 
 def fetch_info_by_group(subject_id: float, group: pd.DataFrame) -> dict:
@@ -52,19 +66,30 @@ def main(args):
     # Close the progress bar
     progress_bar.close()
 
+    # Use multiprocessing to download all the images in grouped_data_list
+    if args.download_images:
+        os.makedirs(args.output_path_images, exist_ok=True)
+        print('Start downloading the images....')
+        download_image_partial = partial(download_image, output_folder_image=args.output_path_images)
+        with Pool() as pool:
+            pool.map(download_image_partial, grouped_data_list)
+        print('Done!')
+
     # Convert the grouped data list to JSON
     json_data = json.dumps(grouped_data_list, indent=4)
 
     # Write the JSON data to a file
-    os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
-    with open(args.output_path, 'w') as file:
+    os.makedirs(os.path.dirname(args.output_path_json), exist_ok=True)
+    with open(args.output_path_json, 'w') as file:
         file.write(json_data)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-path", type=str, default="./")
-    parser.add_argument("--output-path", type=str, default="./")
+    parser.add_argument("--output-path-json", type=str, default="./")
+    parser.add_argument("--output-path-images", type=str, default="./")
+    parser.add_argument("--download-images", type=bool, default=False)
     args = parser.parse_args()
 
     main(args)
