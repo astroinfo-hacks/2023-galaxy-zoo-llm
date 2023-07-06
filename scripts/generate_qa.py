@@ -39,7 +39,7 @@ class QAGenerator:
         spec.loader.exec_module(module)
         return module
     
-    def load_dataset(self, input_file: str, n_inputs: int = -1) -> list[dict]:
+    def load_dataset(self, input_file: str, n_inputs: int = -1) -> list:
         """
         Load the galaxy-zoo json dataset. If specified, a random subset of the dataset is returned.
         """
@@ -65,7 +65,7 @@ class QAGenerator:
 
         # If conversation is a string
         if not isinstance(conversation, str):
-            conversation = ""
+            conversation = None
 
         # Maximum number of tokens you can send to this model is 2,048 tokens per request.
         # TODO: check the size of the conversation
@@ -78,7 +78,7 @@ class QAGenerator:
         elif self.mode == 'conv':  # V1
             return None
 
-    def get_answer_from_gpt(self, entry: dict) -> list[dict]:
+    def get_answer_from_gpt(self, entry: dict) -> list:
         """
         Send the content to GPT and return the answer into a question/answer format.
         """
@@ -89,42 +89,42 @@ class QAGenerator:
         elif self.mode == "conv":
             content = copy.deepcopy(self.prompt) % conversation
 
-        while True and len(conversation) > 0:
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{'role': 'user', 'content': content}],
-                    temperature=0,
-                )
+        if conversation is not None:
+            while True:
+                try:
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[{'role': 'user', 'content': content}],
+                        temperature=0,
+                    )
 
-                answer = response['choices'][0]['message'].content
+                    answer = response['choices'][0]['message'].content
 
-                if self.mode == "desc":  # V0
-                    question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": answer}]
-                elif self.mode == "conv":  # V1
-                    question_and_answer = json.loads(answer)
-                    
+                    if self.mode == "desc":  # V0
+                        question_and_answer = [{"from": "human", "value": question}, {"from": "gpt", "value": answer}]
+                    elif self.mode == "conv":  # V1
+                        question_and_answer = json.loads(answer)
 
-                obj = {
-                    "id": "{}".format(entry['id']),
-                    "image": "{}.png".format(entry['id']),
-                    "conversations": question_and_answer
-                }
+                    obj = {
+                        "id": "{}".format(entry['id']),
+                        "image": "{}.png".format(entry['id']),
+                        "conversations": question_and_answer
+                    }
 
-                return obj
-            
-            except openai.error.RateLimitError:
-                # While GPT is not responding due to rate limit...
-                pass
-            except Exception as e:
-                print(e)
-                conversation = conversation[:-2]
-            
-            time.sleep(1)
+                    return obj
+                
+                except openai.error.RateLimitError:
+                    # While GPT is not responding due to rate limit...
+                    pass
+                except Exception as e:
+                    print(e)
+                    return None
+                
+                time.sleep(1)
         
         return None
 
-    def generate(self) -> list[dict]:
+    def generate(self) -> list:
         """
         Run the generation of questions and answers.
         Use multiprocessing to parallelize the generation of summaries by calling call_api over a list of prompts.
