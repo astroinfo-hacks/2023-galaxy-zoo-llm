@@ -212,7 +212,7 @@ def eval_model(args):
     # Build a set of image paths using the image folder with glob
     image_paths = glob.glob(os.path.join(args.image_folder, "*"))
 
-    for i in tqdm(range(100)):
+    for i in tqdm(range(args.N_ans)):
         idx = i
         qs = prompt_pool[i % len(prompt_pool)]
 
@@ -392,6 +392,7 @@ if __name__ == "__main__":
     parser.add_argument("--conv-mode", type=str, default="simple")
     parser.add_argument("--num-chunks", type=int, default=1)
     parser.add_argument("--chunk-idx", type=int, default=0)
+    parser.add_argument("--N_ans", type=int, default=10)
     parser.add_argument("--answer-prompter", action="store_true")
     args = parser.parse_args()
 

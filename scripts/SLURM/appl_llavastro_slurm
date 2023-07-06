@@ -29,8 +29,9 @@ export PYTHONUSERBASE=$ALL_CCFRWORK/galaxy_zoo/.local_sample
 export PATH=/gpfswork/rech/owt/commun/galaxy_zoo/.local_sample/bin/:$PATH
 
 
-python \
+srun python -u \
 $WORK/2023-galaxy-zoo-llm/scripts/apply_llavastro.py \
 --model-name /gpfswork/rech/owt/commun/LLaVA-13B-v0 \
 --image-folder /gpfsscratch/rech/owt/commun/galaxy_zoo \
---answers-file $WORK/Data/answer.jsonl
+--answers-file $WORK/Data/answer.jsonl \
+--N_ans 100
