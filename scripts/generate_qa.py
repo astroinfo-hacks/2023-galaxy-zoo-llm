@@ -15,12 +15,19 @@ MAX_TOKENS = 2048
 
 class QAGenerator:
 
-    def __init__(self, input_path: str, output_path: str, question_path: str, prompt_path: str, n_inputs: int = -1, n_processes: int = 4) -> None:
+    def __init__(self, input_path: str, output_path: str, prompt_path: str, mode: str, n_inputs: int = -1, n_processes: int = 4) -> None:
         self.dataset = self.load_dataset(input_path, n_inputs)
         self.output_path = output_path
-        self.questions = self.load_module(question_path).questions
-        self.prompt = self.load_module(prompt_path).prompt
         self.n_processes = n_processes
+        module = self.load_module(prompt_path)
+        assert mode in ['conv', 'desc', 'both'], "Mode must be either 'conv' or 'desc' or 'both but received {mode}".format(mode=mode)
+        if mode == 'desc':
+            self.prompt = module.PROMPT_DESC
+            self.questions = module.QUESTIONS_V0
+        elif mode == 'conv':
+            self.prompt = module.PROMPT_CONV
+            self.questions = None
+        #elif mode == 'both':
 
     def load_module(self, path: str):
         """
@@ -111,7 +118,6 @@ class QAGenerator:
         Run the generation of questions and answers.
         Use multiprocessing to parallelize the generation of summaries by calling call_api over a list of prompts.
         """
-
         data = []
         with Pool(self.n_processes) as pool:
             for result in tqdm(pool.imap(self.get_answer_from_gpt, self.dataset), total=len(self.dataset), desc="Generating QA"):
@@ -130,7 +136,7 @@ def main(args):
     # Load the API key
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    qa_generator = QAGenerator(args.input_path, args.output_path, args.question_path, args.prompt_path, args.n_inputs, args.n_processes)
+    qa_generator = QAGenerator(args.input_path, args.output_path, args.prompt_path, args.mode, args.n_inputs, args.n_processes)
     qa_generator.generate()
 
 
@@ -138,8 +144,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-path", type=str, default="./")
     parser.add_argument("--output-path", type=str, default="./")
-    parser.add_argument("--question-path", type=str, default="./")
     parser.add_argument("--prompt-path", type=str, default="./")
+    parser.add_argument("--mode", type=str, default="conv")
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
     args = parser.parse_args()
