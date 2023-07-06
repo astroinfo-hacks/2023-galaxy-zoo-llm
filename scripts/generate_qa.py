@@ -145,7 +145,7 @@ class QAGenerator:
 # Define the main function
 def main(args):
     # Load the API key
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = os.getenv(args.OPENAI_API_KEY)
 
     qa_generator = QAGenerator(args.input_file, args.output_file, args.prompt_file, args.mode, args.n_inputs, args.n_processes)
     qa_generator.generate()
@@ -159,6 +159,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default="conv")
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
+    parser.add_argument("--openai-api-key", type=str, default="OPENAI_API_KEY")
     args = parser.parse_args()
 
     main(args)

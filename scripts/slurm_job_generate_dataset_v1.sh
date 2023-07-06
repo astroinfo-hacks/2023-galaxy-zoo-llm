@@ -23,5 +23,6 @@ srun python -u /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/generate_q
     --input-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/gz_data/json/GZ_talk_comments_notes_urls_AISSAI.json \
     --output-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v1/dataset_v1.json \
     --prompt-file /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/prompt.py \
+    --openai-api-key OPENAI_API_KEY_V1 \
     --mode conv 
 date

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=generate_qa_v0
+#SBATCH --job-name=generate_qa_v0_fast
 ##SBATCH --output=%x%j.out    # job-name + jobid
 #SBATCH --error=%x%j.err    #
 #SBATCH --nodes=1
@@ -23,5 +23,6 @@ srun python -u /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/generate_q
     --input-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/gz_data/json/GZ_talk_comments_notes_urls_AISSAI.json \
     --output-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v0/dataset_v0.json \
     --prompt-file /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/prompt.py \
+    --openai-api-key OPENAI_API_KEY_V0 \
     --mode desc 
 date
