@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 
 def download_image(group_dict):
     try:
-        urllib.request.urlretrieve(group_dict["image"], FLAGS.output_folder + "/" + group_dict["id"] + group_dict["image"].split(".")[-1])
+        urllib.request.urlretrieve(group_dict["image"], FLAGS.output_folder + "/" + group_dict["id"] + "." + group_dict["image"].split(".")[-1])
     except:
         print("Could not download image for subject ID " + group_dict["id"])
 
