@@ -21,7 +21,7 @@ set -x
 ## run script in parallel
 srun python -u /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/generate_qa.py \
     --input-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/gz_data/json/GZ_talk_comments_notes_urls_AISSAI.json \
-    --output-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v0 \
+    --output-file /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v0/dataset_v0.json \
     --prompt-file /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/prompt.py \
     --mode desc 
 date
