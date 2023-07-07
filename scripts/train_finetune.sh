@@ -28,7 +28,7 @@ set -x
 ## run script in parallel
 srun torchrun --nnodes=1 --nproc_per_node=6 --master_port=25001 \
     ~/repo/LLaVA/llava/train/train_mem.py \
-    --model_name_or_path /gpfswork/rech/owt/commun/LLaVA-13B-v0 \
+    --model_name_or_path /gpfswork/rech/owt/commun/galaxy_zoo/checkpoints/llava-13b-pretrain\
     --version v0 \
     --data_path /gpfsscratch/rech/owt/commun/galaxy_zoo/qa_trimmed.json \
     --image_folder /gpfsscratch/rech/owt/commun/galaxy_zoo \
@@ -36,7 +36,7 @@ srun torchrun --nnodes=1 --nproc_per_node=6 --master_port=25001 \
     --mm_vision_select_layer -2 \
     --mm_use_im_start_end True \
     --bf16 True \
-    --output_dir /gpfswork/rech/owt/commun/galaxy_zoo/checkpoints/llava-13b-finetune-v0 \
+    --output_dir /gpfswork/rech/owt/commun/galaxy_zoo/checkpoints/llava-13b-finetune \
     --num_train_epochs 3 \
     --per_device_train_batch_size 4 \
     --per_device_eval_batch_size 4 \
