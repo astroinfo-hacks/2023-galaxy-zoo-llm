@@ -9,6 +9,7 @@ import random
 import copy
 import argparse
 from pathlib import Path
+from gz_datasets import GZDataset
 
 
 MAX_TOKENS = 2048
@@ -16,9 +17,7 @@ MAX_TOKENS = 2048
 
 class QAGenerator:
 
-    def __init__(self, input_file: str, output_file: str, prompt_file: str, mode: str, n_inputs: int = -1, n_processes: int = 4) -> None:
-        self.dataset = self.load_dataset(input_file, n_inputs)
-        self.output_file = output_file
+    def __init__(self, prompt_file: str, mode: str, n_processes: int = 4) -> None:
         self.n_processes = n_processes
         module = self.load_module(prompt_file)
         assert mode in ['conv', 'desc', 'both'], "Mode must be either 'conv' or 'desc' or 'both but received {mode}".format(mode=mode)
@@ -40,21 +39,6 @@ class QAGenerator:
         spec.loader.exec_module(module)
         return module
     
-    def load_dataset(self, input_file: str, n_inputs: int = -1) -> list:
-        """
-        Load the galaxy-zoo json dataset. If specified, a random subset of the dataset is returned.
-        """
-        with open(input_file, 'r') as file:
-            dataset = json.load(file)
-        if 0 < n_inputs < len(dataset):
-            return random.sample(dataset, n_inputs)
-        else:
-            return dataset
-
-    def write_to_json(self, data: list, output_file: str):
-        with open(output_file, 'w') as file:
-            json.dump(data, file, indent=4)
-
     def concat_conversation(self, entry: dict) -> str:
         """
         Convert the conversation into a single string. Each user is separated with '\n\nUser:'.
@@ -123,31 +107,33 @@ class QAGenerator:
         
         return None
 
-    def generate(self) -> list:
+    def generate(self, input_file: str, output_file: str, n_inputs: int = -1, recover_from: str = None) -> GZDataset:
         """
         Run the generation of questions and answers.
         Use multiprocessing to parallelize the generation of summaries by calling call_api over a list of prompts.
         """
-        data = []
+        dataset_input = GZDataset().from_file(input_file, n_inputs)
+        if recover_from is None:
+            dataset_output = GZDataset()
+        else:
+            dataset_output = GZDataset().from_file(recover_from)
         with Pool(self.n_processes) as pool:
-            for result in tqdm(pool.imap(self.get_answer_from_gpt, self.dataset), total=len(self.dataset), desc="Generating QA"):
+            for result in tqdm(pool.imap(self.get_answer_from_gpt, dataset_input.dataset), total=len(dataset_input.dataset), desc="Generating QA"):
                 if result is not None:
-                    data.append(result)
+                    dataset_output.append(result)
                 # Write to json every 100 answers
-                if len(data) % 100 == 0:
-                    self.write_to_json(data, self.output_file)
-        self.write_to_json(data, self.output_file)
+                if len(dataset_output.dataset) % 100 == 0:
+                    dataset_output.write_dataset(output_file)
+        dataset_output.write_dataset(output_file)
 
-        return data
+        return dataset_output
 
 
-# Define the main function
 def main(args):
-    # Load the API key
     openai.api_key = os.getenv(args.openai_api_key)
 
-    qa_generator = QAGenerator(args.input_file, args.output_file, args.prompt_file, args.mode, args.n_inputs, args.n_processes)
-    qa_generator.generate()
+    qa_generator = QAGenerator(args.prompt_file, args.mode, args.n_processes)
+    qa_generator.generate(args.input_file, args.output_file, args.n_inputs, args.recover_from)
 
 
 if __name__ == "__main__":
@@ -158,7 +144,6 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default="conv")
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
-    parser.add_argument("--overwrite", type=bool, default=False)
     parser.add_argument("--recover-from", type=str)
     parser.add_argument("--openai-api-key", type=str, default="OPENAI_API_KEY")
     args = parser.parse_args()
