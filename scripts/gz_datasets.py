@@ -80,7 +80,8 @@ class GZDataset:
     
     def remove_union(self, dataset):
         for entry in dataset.dataset:
-            self.dataset.remove(entry)
+            if any(entry['id'] in self_entry['id'] for self_entry in self.dataset):
+                self.dataset.remove(entry)
     
 
 class RawGZDataset:
