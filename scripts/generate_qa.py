@@ -8,6 +8,7 @@ import importlib
 import random
 import copy
 import argparse
+from pathlib import Path
 
 
 MAX_TOKENS = 2048
@@ -32,7 +33,7 @@ class QAGenerator:
 
     def load_module(self, path: str):
         """
-        Allows to load variables from questions.py and prompt.py.
+        Allows to load variables from any module.py.
         """
         spec = importlib.util.spec_from_file_location("settings", path)
         module = importlib.util.module_from_spec(spec)
@@ -61,11 +62,9 @@ class QAGenerator:
         """
         conversation = ""
         for j in range(len(entry['conversations'])):
-            conversation += "User: " + entry['conversations'][j]['value'] + "\n\n"
-
-        # If conversation is a string
-        if not isinstance(conversation, str):
-            conversation = None
+            message = entry['conversations'][j]['value']
+            if isinstance(message, str):
+                conversation += "User: " + message + "\n\n"
 
         # Maximum number of tokens you can send to this model is 2,048 tokens per request.
         # TODO: check the size of the conversation
@@ -159,6 +158,8 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default="conv")
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
+    parser.add_argument("--overwrite", type=bool, default=False)
+    parser.add_argument("--recover-from", type=str)
     parser.add_argument("--openai-api-key", type=str, default="OPENAI_API_KEY")
     args = parser.parse_args()
 
