@@ -117,6 +117,7 @@ class QAGenerator:
             dataset_output = GZDataset()
         else:
             dataset_output = GZDataset().from_file(recover_from)
+            dataset_output.write_dataset(output_file)
         with Pool(self.n_processes) as pool:
             for result in tqdm(pool.imap(self.get_answer_from_gpt, dataset_input.dataset), total=len(dataset_input.dataset), desc="Generating QA"):
                 if result is not None:

@@ -138,9 +138,9 @@ class RawGZDataset:
 
 class GZImageDataset:
 
-    def __init__(self, input_folder: str, missing_items_file: str = None) -> None:
+    def __init__(self, input_folder: str, recover_from: str = None) -> None:
         self.image_folder = input_folder
-        self.missing_items_file = missing_items_file
+        self.recover_from = recover_from
         self.missing_items_list = []
         os.makedirs(self.image_folder, exist_ok=True)
 
