@@ -6,12 +6,9 @@ from tqdm import tqdm
 
 def main(args):
     dataset = GZDataset().from_file(args.input_file)
-    print('\n\n', len(dataset.dataset), '\n\n')
 
     if args.recover_images:
         _, dataset = dataset.scan_image_folder(args.output_dir_images)
-
-    print('\n\n', len(dataset.dataset), '\n\n')
         
 
     # Use multiprocessing to download all the images in grouped_data_list

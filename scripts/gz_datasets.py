@@ -55,7 +55,7 @@ class GZDataset:
         is_contained, is_not_contained = [], []
 
         # Iterate over the entries in the dataset
-        progress_bar = tqdm(total=len(self.dataset), desc="Processing")
+        progress_bar = tqdm(total=len(self.dataset), desc="Scanning image folder")
 
         for entry in self.dataset:
             # Get the image path
