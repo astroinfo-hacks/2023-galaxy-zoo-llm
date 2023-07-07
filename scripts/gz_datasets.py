@@ -4,7 +4,6 @@ import random
 import os
 import tiktoken
 from urllib import request
-import copy
 import time
 from tqdm import tqdm
 
