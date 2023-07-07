@@ -25,5 +25,5 @@ srun python -u /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/generate_q
     --prompt-file /gpfswork/rech/owt/uka17ma/2023-galaxy-zoo-llm/scripts/prompt.py \
     --openai-api-key OPENAI_API_KEY_V0 \
     --mode desc \
-    --recover_from /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v0/dataset_v0.json
+    --recover-from /gpfsscratch/rech/owt/commun/galaxy_zoo_datasets/v0/dataset_v0.json
 date
