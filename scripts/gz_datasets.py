@@ -46,35 +46,38 @@ class GZDataset:
     
         return train_dataset, test_dataset
 
-    def get_num_tokens_from_string(string: str, encoding_name: str = "cl100k_base") -> int:
+    def get_num_tokens_from_string(self, string: str, encoding_name: str = "cl100k_base") -> int:
         """Returns the number of tokens in a text string."""
         encoding = tiktoken.get_encoding(encoding_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
     
-    def remove_missing_images_from_json(self, image_dir: str) -> list:
-        dataset_trimmed = copy.deepcopy(self.dataset)
-
-        # Create a list to store the entries to be removed
-        to_be_removed = []
+    def scan_image_folder(self, image_folder: str) -> tuple:
+        is_contained, is_not_contained = [], []
 
         # Iterate over the entries in the dataset
+        progress_bar = tqdm(total=len(self.dataset), desc="Processing")
+
         for entry in self.dataset:
             # Get the image path
-            image_path = os.path.join(image_dir, entry['image'])
+            id = entry['id']
+            url = entry["image"]
+            extension = os.path.splitext(url)[1]
+            image_path = os.path.join(image_folder, id + extension)
             
             # Check if the file exists
             try:
                 open(image_path, 'rb')
+                is_contained.append(entry)
             except FileNotFoundError:
                 # Add the entry to the list of entries to be removed
-                to_be_removed.append(entry)
+                is_not_contained.append(entry)
 
-        # Remove the entries from the dataset
-        for entry in to_be_removed:
-            dataset_trimmed.remove(entry)
+            progress_bar.update(1)
 
-        return GZDataset(dataset_trimmed)
+        progress_bar.close()
+
+        return GZDataset().from_list(is_contained), GZDataset().from_list(is_not_contained)
     
 
 class RawGZDataset:
@@ -138,10 +141,8 @@ class RawGZDataset:
 
 class GZImageDataset:
 
-    def __init__(self, input_folder: str, recover_from: str = None) -> None:
+    def __init__(self, input_folder: str) -> None:
         self.image_folder = input_folder
-        self.recover_from = recover_from
-        self.missing_items_list = []
         os.makedirs(self.image_folder, exist_ok=True)
 
     def download_image(self, group_dict: dict) -> None:
@@ -165,14 +166,3 @@ class GZImageDataset:
         print(f"Error occurred while downloading image for subject ID {group_dict['id']}")
         print("URL:", url)
         print("Error message:", str(e))
-        self.missing_items_list.append(url)
-
-    def write_missing_items_csv(self):
-        assert self.missing_items_file is not None
-        missing_items_df = pd.DataFrame(self.missing_items_list)
-        missing_items_df.to_csv(self.missing_items_file)
-
-    
-    def download_missing_items(self, missing_items_file: str):
-        pass
-
