@@ -78,6 +78,10 @@ class GZDataset:
 
         return GZDataset().from_list(is_contained), GZDataset().from_list(is_not_contained)
     
+    def remove_union(self, dataset):
+        for entry in dataset.dataset:
+            self.dataset.remove(entry)
+    
 
 class RawGZDataset:
 
