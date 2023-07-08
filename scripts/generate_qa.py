@@ -95,8 +95,9 @@ class QAGenerator:
 
                     return obj
                 
-                except openai.error.RateLimitError:
+                except openai.error.RateLimitError as e:
                     # While GPT is not responding due to rate limit...
+                    # print(e)
                     pass
                 except Exception as e:
                     print(e)

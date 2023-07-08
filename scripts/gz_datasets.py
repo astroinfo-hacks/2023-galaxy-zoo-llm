@@ -6,6 +6,10 @@ import tiktoken
 from urllib import request
 import time
 from tqdm import tqdm
+import numpy as np
+from multiprocessing import Pool
+from functools import partial
+import itertools
 
 
 class GZDataset:
@@ -78,8 +82,25 @@ class GZDataset:
 
         return GZDataset().from_list(is_contained), GZDataset().from_list(is_not_contained)
     
-    def remove_union(self, dataset):
-        self.dataset = [self_entry for self_entry in self.dataset if self_entry['id'] not in [entry['id'] for entry in dataset.dataset]]
+    def chunk_into_n_sublist(self, lst: list, n: int) -> list:
+        if n >= len(lst):
+            return [lst]
+        else:
+            size = int(np.ceil(len(lst) / n))
+            return list(map(lambda x: lst[x * size:x * size + size], list(range(n))))
+    
+    def process_remove_union_on_sublist(self, dataset: list, self_dataset: list) -> list:
+        return [self_entry for self_entry in self_dataset if self_entry['id'] not in [entry['id'] for entry in dataset]]
+    
+    def remove_union(self, dataset) -> None:
+        self_dataset = self.chunk_into_n_sublist(self.dataset, 10)
+        filtered_dataset = []
+        partial_process = partial(self.process_remove_union_on_sublist, dataset.dataset)
+        with Pool() as pool:
+            for result in tqdm(pool.imap(partial_process, self_dataset), total=len(self_dataset), desc="Remove union"):
+                filtered_dataset.append(result)
+        self.dataset = list(itertools.chain.from_iterable(filtered_dataset))
+        print('Number of entries left:', len(self.dataset))
     
 
 class RawGZDataset:
