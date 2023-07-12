@@ -64,6 +64,7 @@ class QAGenerator:
         """
         Send the content to GPT and return the answer into a question/answer format.
         """
+        last_e = None
         conversation = self.concat_conversation(entry)
         question = self.get_question()
         if self.mode == "desc":
@@ -97,7 +98,9 @@ class QAGenerator:
                 
                 except openai.error.RateLimitError as e:
                     # While GPT is not responding due to rate limit...
-                    # print(e)
+                    if not isinstance(last_e, type(e)):  # To prevent multiple printing of the same error every 1s
+                        last_e = e
+                        print(e)
                     pass
                 except Exception as e:
                     print(e)
