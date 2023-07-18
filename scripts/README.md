@@ -15,11 +15,13 @@ This option should be preferred, but relies on having access to the `GZ_talk_com
 
 The first step is to process this input csv file to produce a simpler representation of the conversations, with comments groupped by image, as well as to download all associated images.
 ```bash
-$ python convertDataSet.py  --input_csv=path/to/GZ_talk_comments_notes_urls_AISSAI.csv \
-                            --output_folder=galaxyzoo_dataset \
-                            --download_images=True
+$ python convert_gz_csv_to_json.py  --input-file=path/to/GZ_talk_comments_notes_urls_AISSAI.csv \
+                                    --output-file=galaxyzoo_dataset
+$ python download_image_dataset.py  --input-file=path/to/GZ_talk_comments_notes_urls_AISSAI.json \
+                                    --output-dir=galaxyzoo_images \
+                                    --recover-images=False
 ```
-This will create a folder named `galaxyzoo_dataset` containing all images, and a `metadata.json` file with the conversations.
+This will create a folder named `galaxyzoo_dataset` containing the `GZ_talk_comments_notes_urls_AISSAI.json` file with the conversations, and a `galaxyzoo_images` containing all the images. Set the --recover-images parameter to True if images are missing.
 
 
 ### Option 2: Web Scraping
@@ -45,6 +47,9 @@ This will generate a new directory called `talks_dset` containing all the images
 To generate a dataset of Q&A pairs, you need to have an OpenAI API key. Assuming you have downloaded and prepared the data in the recommended way, you can run the following script:
 
 ```bash
-$ python generate_qa.py --input=galaxyzoo_dataset/metadata.json --output=galaxyzoo_dataset/qa.json
+$ python generate_qa.py --input-file=galaxyzoo_dataset/GZ_talk_comments_notes_urls_AISSAI.json \
+                        --output-file=galaxyzoo_dataset/qa.json \
+                        --prompt-file=prompt.py \
+                        --mode=desc
 ```
-
+The --mode parameter can be set to desc or conv depending on whether you want to generate a description or pairs of Q&A. To generate a subset, you can set the --n-inputs parameter to an integer value. You can specify the OpenAI API key using the --openai-api-key paramter. If the script stopped abruptly, you can recover from an existing qa.json file using the --recover-from parameter.
