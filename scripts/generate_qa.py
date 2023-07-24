@@ -9,9 +9,10 @@ import random
 import copy
 import argparse
 from gz_datasets import GZDataset
+import logging
 
 
-MAX_TOKENS = 2048
+MAX_TOKENS = 4097
 
 
 class QAGenerator:
@@ -100,10 +101,10 @@ class QAGenerator:
                     # While GPT is not responding due to rate limit...
                     if not isinstance(last_e, type(e)):  # To prevent multiple printing of the same error every 1s
                         last_e = e
-                        print(e)
+                        logging.error(e)
                     pass
                 except Exception as e:
-                    print(e)
+                    logging.error(e)
                     return None
                 
                 time.sleep(1)
@@ -146,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument("--input-file", type=str)
     parser.add_argument("--output-file", type=str)
     parser.add_argument("--prompt-file", type=str)
-    parser.add_argument("--mode", type=str, default="conv")
+    parser.add_argument("--mode", type=str)
     parser.add_argument("--n-inputs", type=int, default=-1)
     parser.add_argument("--n-processes", type=str, default=4)
     parser.add_argument("--recover-from", type=str)
