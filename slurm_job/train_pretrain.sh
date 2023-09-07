@@ -28,9 +28,9 @@ set -x
 ## run script in parallel
 srun torchrun --nnodes=1 --nproc_per_node=6 --master_port=25001 \
     ~/LLaVA/llava/train/train_mem.py \
-    --model_name_or_path /gpfswork/rech/owt/commun/checkpoints/llava-13b-pretrain \
+    --model_name_or_path /gpfswork/rech/owt/commun/LLaVA-13B-v0 \
     --version v0 \
-    --data_path /gpfswork/rech/glc/commun/galaxy_zoo_datasets/dataset_v0_train.json \
+    --data_path /gpfswork/rech/glc/commun/galaxy_zoo_datasets/v0/train/dataset_v0_train.json \
     --image_folder /gpfswork/rech/glc/commun/galaxy_zoo_datasets/gz_data/images \
     --vision_tower openai/clip-vit-large-patch14 \
     --mm_vision_select_layer -2 \
